@@ -1,0 +1,72 @@
+
+
+// php and blade directive //
+--------------------------------------
+
+// use for policy
+@can('create', App\Models\Post::class)
+// Show "Create Post" button
+@endcan
+
+// use for gate
+if (Gate::allows('create-post')) {
+// Show "Create Post" button
+}
+
+@can('create-post')
+// Show "Create Post" button
+@endcan
+
+ @hasPermission('create-post')
+// Show "Create Post" button
+ @endhasPermission
+
+
+// vue or react or js//
+------------------------------------
+get all permissions when login user
+------------------------------------
+
+    public function index(): View
+    {
+        $user = Auth::user();
+
+        // Roles
+        $roles = $user->roles->pluck('name');
+
+        // Direct permissions
+        $directPermissions = $user->permissions->pluck('name');
+
+        // Role permissions (merged from all roles)
+        $rolesPermissions = collect();
+        foreach ($user->roles as $role) {
+            $rolesPermissions = $rolesPermissions->merge($role->permissions->pluck('name'));
+        }
+        $rolesPermissions = $rolesPermissions->unique()->values();
+
+        // All permissions = direct + from roles
+        $allPermissions = $directPermissions->merge($rolesPermissions)->unique()->values();
+
+        return view('home', [
+            'user' => $user,
+            'roles' => $roles,
+            'rolesPermissions' => $rolesPermissions,
+            'directPermissions' => $directPermissions,
+            'allPermissions' => $allPermissions
+        ]);
+    }
+
+
+
+--------------------------------------------------------
+then store this permissions to local storage
+and use them
+
+if (user.permissions.includes('create-post')) {
+// Show "Create Post" button
+}
+
+
+
+
+

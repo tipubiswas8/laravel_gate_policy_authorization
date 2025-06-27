@@ -1,0 +1,38 @@
+
+// migration //
+
+// seeder //
+
+// see the user role permission post product, controller model and view //
+
+// also see dashboard controller index method //
+
+// insert real data using frontend / blade //
+
+user
+role
+permission
+
+// assign role to permission //
+
+assign user to role, tole to permission
+or
+assign user to direct permission
+
+// create auth service provider //
+
+create auth service provider and register to bootstrap providers
+define gate to auth service provider on boot method
+
+
+// create policy //
+
+create policy for every controller if you use policy
+add policies to auth service provider (optional)
+
+// next flow gate policy method controll step //
+
+
+
+
+

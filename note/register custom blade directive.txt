@@ -1,0 +1,21 @@
+
+if you want to register custom blade directive you can register like below in app service provider
+
+
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Blade;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        Blade::if('hasPermission', function ($permission) {
+            return auth()->check() && auth()->user()->hasPermission($permission);
+        });
+    }
+
+}

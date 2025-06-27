@@ -1,0 +1,94 @@
+
+------------------------------------------------------------------------------
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+
+class AuthServiceProvider extends ServiceProvider
+{
+   // Laravel is actually passing first argument $user
+
+    public function boot(): void
+    {
+        $this->registerPolicies();
+
+        Gate::define('check-authorization', function ($user) {
+            // return true;
+            return false;
+        });
+
+        Gate::define('check-user-name', function ($user) {
+            return $user->name === 'Tipu';
+        });
+
+        Gate::define('check-product-name', function ($user, $product) {
+            return $product->name === 'Apple';
+        });
+    }
+}
+
+?>
+---------------------------------------------------------------------------------
+
+<?php
+
+class GateCheckController extends Controller
+{
+    public function checkGate()
+    {
+        if (!Gate::allows('check-authorization')) {
+            abort(403);
+        }
+
+        echo 'You are authorized person';
+
+        $user = Auth::user();
+        if (Gate::allows('check-user-name')) {
+            echo $user->name;
+        } else {
+            echo 'User name is incorrect';
+        }
+
+        $product = [];
+        $product = Product::find(1);
+
+        if (!Gate::allows('check-product-name', $product)) {
+            abort(403);
+        }
+
+        echo 'This product name is Apple';
+-------------------------------------------------------------------------------
+        $user = auth()->user();
+
+        $product = [];
+        $product = Product::find(1);
+        // Check if the user is allowed to perform 'check-product-name'
+        $isAllowed = Gate::forUser($user)->allows('check-product-name', $product);
+        // Or if no model is involved
+        $isAllowed = Gate::forUser($user)->allows('check-authorization');
+
+        dd($isAllowed);
+    }
+}
+
+?>
+
+-----------------------------------------------------------------------
+// blade //
+
+@can('check-authorization')
+  <button>You are allowed something doing button</button>
+@endcan
+
+@can('check-user-name')
+  <button>You are allowed something doing button</button>
+@endcan
+
+@can('check-product-name', \App\Models\Product::find(1))
+  <button>You are allowed something doing button</button>
+@endcan
+
+

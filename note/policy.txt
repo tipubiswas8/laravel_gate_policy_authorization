@@ -1,0 +1,127 @@
+
+-----------------------------------------------------
+<?php
+
+<?php
+
+namespace App\Policies;
+
+use App\Models\Product;
+use App\Models\User;
+
+class ProductPolicy
+{
+
+    public function create(User $user): bool
+    {
+        return true;
+        return false;
+        return $user->can('product-create');
+        return $user->isAdmin();
+        return $user->can('product-create') || $user->isAdmin();
+        return $user->can('product-create') || $user->can('product-edit');
+        return $user->role === 'admin';
+        return $user->role === $user->can_create_product;
+        return $user->role === 'admin' || $user->can_create_product;
+        return $user->hasPermission('product-create');
+        return $user->hasPermission('product-create') || $user->isAdmin();
+        return $user->permissions()->where('name', 'product-create')->exists();
+
+        // most use is $user->hasPermission('product-create'); and $user->can('product-create');
+    }
+
+    public function view(User $user, Product $product)
+    {
+        return $user->hasPermission('product-show');
+    }
+
+}
+
+--------------------------------------------------------------------
+
+class ProductController extends Controller
+{
+    public function create()
+    {
+        $this->authorize('create', Product::class); // create is policy method name
+        return view('products.create');
+    }
+
+    public function show(Product $product)
+    {
+         $this->authorize('view', $product); // view is policy method name
+        return view('products.show', compact('product'));
+    }
+}
+
+
+-------------------------------------------------------------------
+// blade //
+
+@can('create', App\Models\Product::class)
+  <button>You are allowed for product create</button>
+@endcan
+
+
+// this maybe not controll button due to it use for give asscee to policy,
+ so it can give access into directive
+@can('product-create')
+  <button>You are allowed for product create</button>
+@endcan
+
+
+
+
+
+
+====================================================================
+
+Controller Method	    Policy Method Laravel Will Use
+index()	                viewAny(User $user)
+create()	            create(User $user)
+store()	                create(User $user) ✅
+show()	                view(User $user, Product $product)
+edit()	                update(User $user, Product $product)
+update()	            update(User $user, Product $product)
+destroy()	            delete(User $user, Product $product)
+
+
+
+Rules:
+
+If your policy method needs only the User (no model instance), pass Product::class as second argument.
+
+If it needs both User and a Product, pass the $product model as second argument.
+
+Example:
+
+----------- 1 ---------------
+If it needs both User and a Product, pass the $product model as second argument.
+    public function publish(Product $product)
+    {
+        $this->authorize('publish', $product);
+
+        return redirect()->route('products.index')->with('success', 'Product published.');
+    }
+
+
+    public function publish(User $user, Product $product): bool
+    {
+        return $user->hasPermission('product-publish');
+    }
+
+----------- 2 --------------
+If your policy method needs only the User (no model instance), pass Product::class as second argument.
+
+    public function archive()
+    {
+        $this->authorize('archive', Product::class);
+
+        return redirect()->route('products.index')->with('success', 'Product archive.');
+    }
+
+
+    public function archive(User $user): bool
+    {
+        return $user->hasPermission('product-archive');
+    }

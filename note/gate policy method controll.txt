@@ -1,0 +1,22 @@
+
+// method authorization controlling //
+
+    public function create(): View
+    {
+        // without gate or policy
+        $user = Auth::user();
+        if (!$user->hasPermission('product-create')) {
+            abort(403);
+        }
+
+        // with gate
+        if (!Gate::allows('product-create')) {
+            abort(403);
+        }
+
+        // with policy
+        $this->authorize('create', Product::class);
+        // automatic redirect 403 (unauthenticate)
+
+        return view('products.create');
+    }
